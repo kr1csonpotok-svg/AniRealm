@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AniRealm - Современный портал аниме</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            accent: '#ff4655'
+                        },
+                        dark: {
+                            base: '#0b0f19',
+                            card: '#151c2c',
+                            hover: '#1e293b',
+                            border: '#2a364f'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f19;
+            color: #f3f4f6;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a364f;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4f46e5;
+        }
+        .glass {
+            background: rgba(21, 28, 44, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-modal {
+            background: rgba(15, 22, 36, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-dark-base text-gray-100 min-h-screen flex flex-col selection:bg-brand-600 selection:text-white">
+
+    <!-- HEADER NAVBAR -->
+    <header class="sticky top-0 z-40 glass border-b border-dark-border/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            <!-- Logo & Brand -->
+            <div class="flex items-center gap-8">
+                <a href="#" onclick="resetFilters(); return false;" class="flex items-center gap-2.5 group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-brand-accent flex items-center justify-center text-white shadow-lg shadow-brand-600/30 group-hover:scale-105 transition-transform duration-300">
+                        <i class="fa-solid fa-play text-lg ml-0.5"></i>
+                    </div>
+                    <span class="text-xl font-bold tracking-wider bg-gradient-to-r from-white via-gray-200 to-brand-500 bg-clip-text text-transparent">
+                        Ani<span class="text-brand-accent">Realm</span>
+                    </span>
+                </a>
+
+                <!-- Navigation Links (Desktop) -->
+                <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+                    <a href="#" onclick="filterByNav('all')" class="text-gray-300 hover:text-brand-500 transition-colors">Главная</a>
+                    <a href="#" onclick="filterByNav('ongoing')" class="text-gray-300 hover:text-brand-500 transition-colors">Онгоинги</a>
+                    <a href="#" onclick="filterByNav('movies')" class="text-gray-300 hover:text-brand-500 transition-colors">Фильмы</a>
+                    <a href="#" onclick="filterByNav('top')" class="text-gray-300 hover:text-brand-500 transition-colors">Топ Рейтинга</a>
+                </nav>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="flex-1 max-w-md hidden sm:block relative">
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="text" id="searchInput" placeholder="Поиск аниме (например, Атака титанов)..." 
+                        class="w-full bg-dark-card/90 border border-dark-border/80 rounded-full pl-10 pr-4 py-2 text-sm text-gray-100 placeholder-gray-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all">
+                    <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Actions Right -->
+            <div class="flex items-center gap-3 sm:gap-4">
+                <button onclick="toggleMobileSearch()" class="sm:hidden p-2 text-gray-300 hover:text-white rounded-lg hover:bg-dark-hover">
+                    <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                </button>
+
+                <!-- Favorites Toggle Drawer Button -->
+                <button onclick="toggleFavoritesDrawer()" class="relative p-2.5 text-gray-300 hover:text-white rounded-xl bg-dark-card border border-dark-border hover:border-brand-500/50 transition-all flex items-center gap-2 group">
+                    <i class="fa-solid fa-bookmark text-brand-500 group-hover:scale-110 transition-transform"></i>
+                    <span class="text-xs font-semibold hidden md:inline">Закладки</span>
+                    <span id="favCountBadge" class="absolute -top-1.5 -right-1.5 bg-brand-accent text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-dark-base shadow-sm">0</span>
+                </button>
+
+                <!-- User Profile Dropdown Button -->
+                <div class="relative">
+                    <button id="userProfileBtn" onclick="toggleUserMenu()" class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-dark-hover transition-colors border border-transparent hover:border-dark-border">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="Аватар" class="w-8 h-8 rounded-lg object-cover ring-2 ring-brand-500/50">
+                        <i class="fa-solid fa-chevron-down text-xs text-gray-400 hidden sm:inline"></i>
+                    </button>
+
+                    <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 glass-modal rounded-xl shadow-2xl py-2 z-50 text-xs">
+                        <div class="px-4 py-2 border-b border-dark-border/60">
+                            <p class="font-bold text-gray-200">Alex_Otaku</p>
+                            <p class="text-gray-400">Премиум Подписка</p>
+                        </div>
+                        <a href="#" onclick="showToast('Раздел профиля в разработке'); return false;" class="px-4 py-2.5 flex items-center gap-2 hover:bg-brand-600/20 text-gray-300 hover:text-white transition-colors">
+                            <i class="fa-solid fa-user w-4"></i> Мой профиль
+                        </a>
+                        <a href="#" onclick="toggleFavoritesDrawer(); toggleUserMenu(); return false;" class="px-4 py-2.5 flex items-center gap-2 hover:bg-brand-600/20 text-gray-300 hover:text-white transition-colors">
+                            <i class="fa-solid fa-heart w-4"></i> Избранное
+                        </a>
+                        <div class="border-t border-dark-border/60 my-1"></div>
+                        <a href="#" onclick="showToast('Выход выполнен'); return false;" class="px-4 py-2 flex items-center gap-2 hover:bg-red-500/20 text-red-400 transition-colors">
+                            <i class="fa-solid fa-right-from-bracket w-4"></i> Выйти
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="mobileSearchBox" class="hidden sm:hidden px-4 pb-3 border-t border-dark-border/40 pt-2 bg-dark-base">
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                <input type="text" id="mobileSearchInput" placeholder="Поиск аниме..." 
+                    class="w-full bg-dark-card border border-dark-border rounded-xl pl-10 pr-4 py-2 text-sm text-gray-100 placeholder-gray-400 focus:outline-none focus:border-brand-500">
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO CAROUSEL BANNER -->
+    <section class="relative w-full bg-gradient-to-b from-dark-card/50 to-dark-base overflow-hidden border-b border-dark-border/30">
+        <div id="heroContainer" class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+            <!-- Dynamic Hero injected via JS -->
+        </div>
+        <div id="heroDots" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+            <!-- Hero dots via JS -->
+        </div>
+    </section>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+
+        <!-- FILTER BAR & CONTROLS -->
+        <section class="mb-8 space-y-4">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 glass p-4 sm:p-5 rounded-2xl border border-dark-border/60 shadow-xl">
+                
+                <div class="space-y-2">
+                    <label class="text-xs font-semibold text-gray-400 tracking-wider uppercase flex items-center gap-1.5">
+                        <i class="fa-solid fa-tags text-brand-500"></i> Жанры
+                    </label>
+                    <div id="genrePills" class="flex flex-wrap gap-1.5 sm:gap-2">
+                        <!-- Genre Buttons injected via JS -->
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3 pt-2 lg:pt-0 border-t lg:border-t-0 border-dark-border/40">
+                    <div class="flex-1 sm:flex-initial">
+                        <label class="block text-[10px] font-semibold text-gray-400 uppercase mb-1">Статус</label>
+                        <select id="statusSelect" onchange="applyFilters()" class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-brand-500 cursor-pointer">
+                            <option value="all">Все статусы</option>
+                            <option value="Онгоинг">Онгоинг</option>
+                            <option value="Завершён">Завершён</option>
+                        </select>
+                    </div>
+
+                    <div class="flex-1 sm:flex-initial">
+                        <label class="block text-[10px] font-semibold text-gray-400 uppercase mb-1">Формат</label>
+                        <select id="formatSelect" onchange="applyFilters()" class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-brand-500 cursor-pointer">
+                            <option value="all">Все форматы</option>
+                            <option value="TV">TV Сериал</option>
+                            <option value="Movie">Фильм</option>
+                        </select>
+                    </div>
+
+                    <div class="flex-1 sm:flex-initial">
+                        <label class="block text-[10px] font-semibold text-gray-400 uppercase mb-1">Сортировка</label>
+                        <select id="sortSelect" onchange="applyFilters()" class="w-full bg-dark-card border border-dark-border rounded-xl px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-brand-500 cursor-pointer">
+                            <option value="rating">По рейтингу (высокий)</option>
+                            <option value="popularity">По популярности</option>
+                            <option value="year_desc">По году (новые)</option>
+                            <option value="year_asc">По году (старые)</option>
+                        </select>
+                    </div>
+
+                    <div class="self-end">
+                        <button onclick="resetFilters()" title="Сбросить фильтры" class="p-2.5 bg-dark-card hover:bg-dark-hover border border-dark-border text-gray-400 hover:text-white rounded-xl transition-colors">
+                            <i class="fa-solid fa-rotate-left text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between text-xs text-gray-400 px-1">
+                <div>Найдено тайтлов: <span id="animeCount" class="font-bold text-brand-500">0</span></div>
+                <div id="activeFilterBadge" class="hidden text-brand-accent font-medium">Применены фильтры</div>
+            </div>
+        </section>
+
+        <!-- ANIME CATALOG GRID -->
+        <section id="animeGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+            <!-- Anime Cards JS Injection -->
+        </section>
+
+        <!-- Empty State Message -->
+        <div id="emptyState" class="hidden text-center py-16 space-y-4">
+            <div class="w-20 h-20 mx-auto rounded-full bg-dark-card flex items-center justify-center text-gray-500 text-3xl">
+                <i class="fa-solid fa-film"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-300">Ничего не найдено</h3>
+            <p class="text-sm text-gray-500 max-w-sm mx-auto">Попробуйте изменить параметры поиска или сбросить фильтры категории.</p>
+            <button onclick="resetFilters()" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-medium text-xs rounded-xl shadow-lg shadow-brand-600/30 transition-all">
+                Сбросить фильтры
+            </button>
+        </div>
+    </main>
+
+    <!-- FAVORITES DRAWER SIDEBAR -->
+    <div id="favDrawerOverlay" onclick="toggleFavoritesDrawer()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+    <aside id="favDrawer" class="fixed top-0 right-0 h-full w-full sm:w-96 glass-modal z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col shadow-2xl">
+        <div class="p-5 border-b border-dark-border/80 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <i class="fa-solid fa-bookmark text-brand-accent text-lg"></i>
+                <h2 class="text-lg font-bold text-white">Избранное / Закладки</h2>
+            </div>
+            <button onclick="toggleFavoritesDrawer()" class="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-dark-hover transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <div id="favListContainer" class="flex-1 overflow-y-auto p-4 space-y-3">
+            <!-- Dynamic Favorites List -->
+        </div>
+
+        <div class="p-4 border-t border-dark-border/80 bg-dark-card/50">
+            <button onclick="clearAllFavorites()" class="w-full py-2.5 px-4 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-2">
+                <i class="fa-solid fa-trash-can"></i> Очистить весь список
+            </button>
+        </div>
+    </aside>
+
+    <!-- ANIME DETAIL MODAL -->
+    <div id="detailModalOverlay" onclick="closeDetailModal(event)" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-2 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-300 overflow-y-auto">
+        <div id="detailModalCard" class="relative w-full max-w-4xl glass-modal rounded-2xl border border-dark-border overflow-hidden shadow-2xl my-auto transform scale-95 transition-transform duration-300 max-h-[90vh] flex flex-col">
+            
+            <button onclick="closeDetailModalForce()" class="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-dark-base/80 border border-white/10 text-white flex items-center justify-center hover:bg-brand-accent transition-colors shadow-lg">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="overflow-y-auto flex-1">
+                <div class="relative h-64 sm:h-80 w-full overflow-hidden">
+                    <img id="modalBannerImg" src="" alt="Banner" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-dark-card via-dark-card/60 to-transparent"></div>
+                    
+                    <div class="absolute bottom-4 left-4 sm:left-6 right-4 flex items-end gap-4">
+                        <img id="modalPosterImg" src="" alt="Poster" class="w-24 sm:w-36 h-36 sm:h-52 rounded-xl object-cover border-2 border-brand-500/50 shadow-2xl hidden sm:block">
+                        <div class="flex-1 space-y-2">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span id="modalStatusBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-brand-600 text-white"></span>
+                                <span id="modalFormatBadge" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-dark-hover text-gray-300 border border-dark-border"></span>
+                                <span id="modalYear" class="text-xs text-gray-300 font-medium"></span>
+                            </div>
+                            <h2 id="modalTitle" class="text-2xl sm:text-3xl font-extrabold text-white leading-tight"></h2>
+                            <p id="modalOrigTitle" class="text-xs text-gray-400 italic"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 sm:p-6 space-y-6">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 rounded-xl bg-dark-card/80 border border-dark-border/50 text-center text-xs">
+                        <div>
+                            <span class="text-gray-400 block text-[10px] uppercase">Рейтинг</span>
+                            <span id="modalRating" class="text-yellow-400 font-bold text-sm"></span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 block text-[10px] uppercase">Серии</span>
+                            <span id="modalEpisodes" class="text-white font-bold text-sm"></span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 block text-[10px] uppercase">Длительность</span>
+                            <span id="modalDuration" class="text-white font-bold text-sm"></span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 block text-[10px] uppercase">Студия</span>
+                            <span id="modalStudio" class="text-brand-500 font-bold text-sm"></span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Жанры</h4>
+                        <div id="modalGenres" class="flex flex-wrap gap-2"></div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <h3 class="text-base font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-align-left text-brand-500 text-sm"></i> Описание
+                        </h3>
+                        <p id="modalSynopsis" class="text-sm text-gray-300 leading-relaxed font-normal"></p>
+                    </div>
+
+                    <!-- YOUTUBE TRAILER & PLAYER INTEGRATION -->
+                    <div class="space-y-3 pt-2">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-circle-play text-brand-accent text-sm"></i> Смотреть трейлер / Видео
+                            </h3>
+                            <span class="text-xs text-gray-400">Официальный трейлер</span>
+                        </div>
+                        
+                        <div id="videoPlayerContainer" class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden border border-dark-border shadow-2xl">
+                            <!-- Youtube Iframe injected dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Characters Section -->
+                    <div class="space-y-3 pt-2">
+                        <h3 class="text-base font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-users text-brand-500 text-sm"></i> Персонажи
+                        </h3>
+                        <div id="modalCharacters" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <!-- Characters JS -->
+                        </div>
+                    </div>
+
+                    <!-- Screenshots Gallery -->
+                    <div class="space-y-3 pt-2">
+                        <h3 class="text-base font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-images text-brand-500 text-sm"></i> Кадры из аниме
+                        </h3>
+                        <div id="modalScreenshots" class="grid grid-cols-3 gap-2 sm:gap-3">
+                            <!-- Screenshots JS -->
+                        </div>
+                    </div>
+
+                    <!-- Reviews & Comments -->
+                    <div class="space-y-4 pt-4 border-t border-dark-border/60">
+                        <h3 class="text-base font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-comments text-brand-500 text-sm"></i> Отзывы зрителей
+                        </h3>
+
+                        <div class="space-y-2 bg-dark-card/60 p-3.5 rounded-xl border border-dark-border/50">
+                            <textarea id="newReviewText" rows="2" placeholder="Оставьте свой отзыв об этом аниме..." class="w-full bg-dark-base border border-dark-border rounded-lg p-2.5 text-xs text-gray-200 placeholder-gray-500 focus:outline-none focus:border-brand-500 resize-none"></textarea>
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-1 text-yellow-400 text-xs">
+                                    <span>Ваша оценка:</span>
+                                    <select id="newReviewRating" class="bg-dark-base border border-dark-border text-white text-xs rounded px-1.5 py-0.5 focus:outline-none">
+                                        <option value="10">★ 10</option>
+                                        <option value="9">★ 9</option>
+                                        <option value="8">★ 8</option>
+                                        <option value="7">★ 7</option>
+                                    </select>
+                                </div>
+                                <button onclick="submitReview()" class="px-4 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-semibold transition-colors">Отправить</button>
+                            </div>
+                        </div>
+
+                        <div id="modalReviews" class="space-y-3">
+                            <!-- Reviews JS -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 glass-modal px-4 py-3 rounded-xl border border-brand-500/40 text-xs font-semibold text-white flex items-center gap-3 shadow-2xl">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-brand-500 text-base"></i>
+        <span id="toastMsg">Уведомление</span>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="mt-16 bg-dark-card border-t border-dark-border/60 py-10 text-xs text-gray-400">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-600 to-brand-accent flex items-center justify-center text-white">
+                        <i class="fa-solid fa-play text-xs"></i>
+                    </div>
+                    <span class="text-base font-bold text-white tracking-wider">AniRealm</span>
+                </div>
+                <div class="flex flex-wrap justify-center gap-6 text-gray-400">
+                    <a href="#" class="hover:text-brand-500 transition-colors">Правообладателям</a>
+                    <a href="#" class="hover:text-brand-500 transition-colors">Соглашение</a>
+                    <a href="#" class="hover:text-brand-500 transition-colors">Конфиденциальность</a>
+                    <a href="#" class="hover:text-brand-500 transition-colors">Контакты</a>
+                </div>
+                <div class="flex items-center gap-3 text-lg">
+                    <a href="#" class="w-8 h-8 rounded-full bg-dark-hover flex items-center justify-center hover:text-brand-500 transition-colors"><i class="fa-brands fa-vk"></i></a>
+                    <a href="#" class="w-8 h-8 rounded-full bg-dark-hover flex items-center justify-center hover:text-brand-500 transition-colors"><i class="fa-brands fa-telegram"></i></a>
+                    <a href="#" class="w-8 h-8 rounded-full bg-dark-hover flex items-center justify-center hover:text-brand-500 transition-colors"><i class="fa-brands fa-discord"></i></a>
+                </div>
+            </div>
+            <div class="border-t border-dark-border/40 pt-6 text-center text-gray-500">
+                <p>© 2026 AniRealm. Все права защищены. Сайт создан исключительно в ознакомительных целях.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- APPLICATION JAVASCRIPT -->
+    <script>
+        const animeData = [
+            {
+                id: "1",
+                title: "Атака титанов: Финал",
+                origTitle: "Shingeki no Kyojin: The Final Season",
+                poster: "https://cdn.myanimelist.net/images/anime/1948/120625.jpg",
+                banner: "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1200&q=80",
+                trailerYoutubeId: "M_OauHnAFc8",
+                rating: 9.1,
+                popularity: 9800,
+                year: 2023,
+                episodes: 28,
+                duration: "24 мин.",
+                studio: "MAPPA",
+                format: "TV",
+                status: "Завершён",
+                genres: ["Экшен", "Фэнтези", "Триллер"],
+                synopsis: "Уже сотни лет человечество сражается с гигантами — титанами, пожирающими людей ради удовольствия. Эрен Йегер и его друзья поклялись уничтожить всех титанов после трагедии в родном городе. Однако истинная правда о мире оказывается гораздо сложнее и мрачнее...",
+                heroFeatured: true,
+                characters: [
+                    { name: "Эрен Йегер", role: "Главный герой", img: "https://cdn.myanimelist.net/images/characters/10/216895.jpg" },
+                    { name: "Микаса Аккерман", role: "Защитница", img: "https://cdn.myanimelist.net/images/characters/9/215563.jpg" },
+                    { name: "Армин Арлерт", role: "Стратег", img: "https://cdn.myanimelist.net/images/characters/16/216733.jpg" }
+                ],
+                screenshots: [
+                    "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=500&q=80"
+                ],
+                reviews: [
+                    { user: "TitanFan99", rating: 10, text: "Шедевр современной анимации! Финал держит в напряжении до последней секунды.", date: "12 мая 2024" },
+                    { user: "OtakuReview", rating: 9, text: "MAPPA проделала колоссальную работу над рисовкой и эпичными битвами.", date: "01 июня 2024" }
+                ]
+            },
+            {
+                id: "2",
+                title: "Поднятие уровня в одиночку",
+                origTitle: "Ore dake Level Up na Ken / Solo Leveling",
+                poster: "https://cdn.myanimelist.net/images/anime/1521/140810.jpg",
+                banner: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+                trailerYoutubeId: "9S_6WJ1bJt0",
+                rating: 8.7,
+                popularity: 9600,
+                year: 2024,
+                episodes: 12,
+                duration: "24 мин.",
+                studio: "A-1 Pictures",
+                format: "TV",
+                status: "Завершён",
+                genres: ["Экшен", "Фэнтези"],
+                synopsis: "Десять лет назад открылись врата в параллельное измерение. Сон Джин-у считается наислабейшим охотником ранга E. Однако после смертельного инцидента в подземелье он получает уникальную способность видеть интерфейс и повышать свой уровень без ограничений.",
+                heroFeatured: true,
+                characters: [
+                    { name: "Сон Джин-у", role: "Теневой монарх", img: "https://cdn.myanimelist.net/images/characters/11/530663.jpg" },
+                    { name: "Ча Хэ-ин", role: "Охотник ранга S", img: "https://cdn.myanimelist.net/images/characters/14/532306.jpg" }
+                ],
+                screenshots: [
+                    "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=500&q=80"
+                ],
+                reviews: [
+                    { user: "Hunter_Solo", rating: 10, text: "Рисовка и боевка от A-1 Pictures просто огонь! Выглядит невероятно круто.", date: "10 февраля 2024" }
+                ]
+            },
+            {
+                id: "3",
+                title: "Человек-бензопила",
+                origTitle: "Chainsaw Man",
+                poster: "https://cdn.myanimelist.net/images/anime/1806/126216.jpg",
+                banner: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=1200&q=80",
+                trailerYoutubeId: "v4yLeNt-82c",
+                rating: 8.6,
+                popularity: 9400,
+                year: 2022,
+                episodes: 12,
+                duration: "24 мин.",
+                studio: "MAPPA",
+                format: "TV",
+                status: "Завершён",
+                genres: ["Экшен", "Триллер", "Фэнтези"],
+                synopsis: "Дэндзи — бедный парень, отрабатывающий долги отца с помощью демона-бензопилы Почиты. После предательства он сливается с Почитой и становится Человеком-бензопилой, поступая на службу к охотникам на демонов.",
+                heroFeatured: true,
+                characters: [
+                    { name: "Дэндзи", role: "Человек-бензопила", img: "https://cdn.myanimelist.net/images/characters/7/492476.jpg" },
+                    { name: "Макима", role: "Глава отдела", img: "https://cdn.myanimelist.net/images/characters/13/492478.jpg" },
+                    { name: "Пауэр", role: "Одержимая кровью", img: "https://cdn.myanimelist.net/images/characters/3/492479.jpg" }
+                ],
+                screenshots: [
+                    "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=500&q=80"
+                ],
+                reviews: [
+                    { user: "PochitaLover", rating: 9, text: "Кинематографичная постановка сцен и безумный драйв!", date: "15 декабря 2022" }
+                ]
+            },
+            {
+                id: "4",
+                title: "Магическая битва 2",
+                origTitle: "Jujutsu Kaisen 2nd Season",
+                poster: "https://cdn.myanimelist.net/images/anime/1792/138060.jpg",
+                banner: "https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=1200&q=80",
+                trailerYoutubeId: "O6qV4f2rInU",
+                rating: 8.8,
+                popularity: 9500,
+                year: 2023,
+                episodes: 23,
+                duration: "24 мин.",
+                studio: "MAPPA",
+                format: "TV",
+                status: "Завершён",
+                genres: ["Экшен", "Фэнтези", "Триллер"],
+                synopsis: "Второй сезон раскрывает прошлое Сатору Годзё и Сугуру Гето во время их учебы в колледже магии, а также показывает масштабный инцидент в Сибуе, меняющий мир проклятий навсегда.",
+                heroFeatured: false,
+                characters: [
+                    { name: "Сатору Годзё", role: "Сильнейший маг", img: "https://cdn.myanimelist.net/images/characters/6/420232.jpg" },
+                    { name: "Юдзи Итадори", role: "Сосуд Сукуны", img: "https://cdn.myanimelist.net/images/characters/2/420231.jpg" }
+                ],
+                screenshots: [
+                    "https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=500&q=80"
+                ],
+                reviews: [
+                    { user: "GojoSatoru_Real", rating: 10, text: "Арка Сибуи — это лучшее, что выходило в жанре сёнен за последние годы!", date: "15 января 2024" }
+                ]
+            },
+            {
+                id: "5",
+                title: "Клинок, рассекающий демонов",
+                origTitle: "Kimetsu no Yaiba",
+                poster: "https://cdn.myanimelist.net/images/anime/1286/99889.jpg",
+                banner: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1200&q=80",
+                trailerYoutubeId: "VQGCKyuzIM4",
+                rating: 8.7,
+                popularity: 9900,
+                year: 2024,
+                episodes: 8,
+                duration: "25 мин.",
+                studio: "ufotable",
+                format: "TV",
+                status: "Онгоинг",
+                genres: ["Экшен", "Фэнтези"],
+                synopsis: "Танджиро Камадо продолжает путь, чтобы вернуть человеческий облик своей сестре Незуко, обращенной в демона. Впереди их ждут тренировки со Столпами и решающая битва.",
+                heroFeatured: false,
+                characters: [
+                    { name: "Танджиро Камадо", role: "Истребитель демонов", img: "https://cdn.myanimelist.net/images/characters/16/383210.jpg" },
+                    { name: "Незуко Камадо", role: "Сестра Танджиро", img: "https://cdn.myanimelist.net/images/characters/2/383211.jpg" }
+                ],
+                screenshots: [
+                    "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=500&q=80"
+                ],
+                reviews: [
+                    { user: "DemonSlayer_Fan", rating: 9, text: "Анимация от ufotable как всегда на божественном уровне!", date: "20 февраля 2024" }
+                ]
+            },
+            {
+                id: "6",
+                title: "Тетрадь смерти",
+                origTitle: "Death Note",
+                poster: "https://cdn.myanimelist.net/images/anime/9/9444.jpg",
+                banner: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80",
+                trailerYoutubeId: "NlJZ-YgAt-c",
+                rating: 8.6,
+                popularity: 9950,
+                year: 2006,
+                episodes: 37,
+                duration: "23 мин.",
+                studio: "Madhouse",
+                format: "TV",
+                status: "Завершён",
+                genres: ["Триллер", "Драма"],
+                synopsis: "Старшеклассник Лайт Ягами находит мистическую тетрадь смерти. Человек, чьё имя будет записано в ней, умирает. Лайт решает очистить мир от преступности, сталкиваясь с гениальным детективом L.",
+                heroFeatured: false,
+                characters: [
+                    { name: "Лайт Ягами", role: "Кира", img: "https://cdn.myanimelist.net/images/characters/6/63870.jpg" },
+                    { name: "L", role: "Детектив", img: "https://cdn.myanimelist.net/images/characters/10/58321.jpg" }
+                ],
+                screenshots: [
+                    "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=500&q=80"
+                ],
+                reviews: [
+                    { user: "Kira_God", rating: 10, text: "Культовое аниме с нереальной интеллектуальной дуэлью!", date: "10 мая 2023" }
+                ]
+            },
+            {
+                id: "7",
+                title: "Ван-Пис",
+                origTitle: "One Piece",
+                poster: "https://cdn.myanimelist.net/images/anime/6/73245.jpg",
+                banner: "https://images.unsplash.com/photo-1560169897-fc0cdbdfa4d5?auto=format&fit=crop&w=1200&q=80",
+                trailerYoutubeId: "MCb13lbktmU",
+                rating: 8.9,
+                popularity: 9990,
+                year: 1999,
+                episodes: 1090,
+                duration: "24 мин.",
+                studio: "Toei Animation",
+                format: "TV",
+                status: "Онгоинг",
+                genres: ["Экшен", "Комедия", "Фэнтези"],
+                synopsis: "Монки Д. Луффи, съевший Дьявольский плод и получивший способность растягиваться, отправляется в плавание, чтобы собрать команду и найти легендарное сокровище Ван-Пис.",
+                heroFeatured: false,
+                characters: [
+                    { name: "Монки Д. Луффи", role: "Капитан", img: "https://cdn.myanimelist.net/images/characters/9/310307.jpg" },
+                    { name: "Ророноа Зоро", role: "Мечник", img: "https://cdn.myanimelist.net/images/characters/3/100534.jpg" }
+                ],
+                screenshots: [
+                    "https://images.unsplash.com/photo-1560169897-fc0cdbdfa4d5?auto=format&fit=crop&w=500&q=80"
+                ],
+                reviews: [
+                    { user: "PirateKing", rating: 10, text: "Лучшее эпическое приключение всех времен!", date: "01 января 2024" }
+                ]
+            },
+            {
+                id: "8",
+                title: "Наруто: Ураганные хроники",
+                origTitle: "Naruto: Shippuuden",
+                poster: "https://cdn.myanimelist.net/images/anime/1565/111305.jpg",
+                banner: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=80",
+                trailerYoutubeId: "1y_aI_8BfP0",
+                rating: 8.3,
+                popularity: 9920,
+                year: 2007,
+                episodes: 500,
+                duration: "23 мин.",
+                studio: "Studio Pierrot",
+                format: "TV",
+                status: "Завершён",
+                genres: ["Экшен", "Фэнтези", "Комедия"],
+                synopsis: "Наруто Удзумаки возвращается в Деревню Скрытого Листа после двух с половиной лет тренировок. Впереди его ждут сражения с опасной организацией Акацуки и спасение друга Саске.",
+                heroFeatured: false,
+                characters: [
+                    { name: "Наруто Удзумаки", role: "Ниндзя", img: "https://cdn.myanimelist.net/images/characters/2/284121.jpg" },
+                    { name: "Саске Учиха", role: "Ниндзя", img: "https://cdn.myanimelist.net/images/characters/9/131317.jpg" }
+                ],
+                screenshots: [
+                    "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=500&q=80"
+                ],
+                reviews: [
+                    { user: "Hokage7", rating: 10, text: "Легенда детства! Музыка и истории персонажей на высоте.", date: "12 июля 2023" }
+                ]
+            }
+        ];
+
+        const allGenres = ["Все", "Экшен", "Фэнтези", "Триллер", "Комедия", "Драма"];
+
+        // --- STATE MANAGEMENT ---
+        let selectedGenre = "Все";
+        let searchQuery = "";
+        let favorites = JSON.parse(localStorage.getItem('aniRealm_favs')) || [];
+        let currentHeroIndex = 0;
+        let heroTimer = null;
+        let activeModalAnime = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderGenrePills();
+            renderHeroCarousel();
+            applyFilters();
+            updateFavCount();
+            setupSearchListeners();
+            startHeroTimer();
+        });
+
+        function renderGenrePills() {
+            const container = document.getElementById('genrePills');
+            container.innerHTML = allGenres.map(genre => `
+                <button onclick="setGenre('${genre}')" 
+                    class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                        selectedGenre === genre 
+                        ? 'bg-brand-600 text-white shadow-md shadow-brand-600/30 ring-2 ring-brand-500/50' 
+                        : 'bg-dark-card hover:bg-dark-hover text-gray-300 border border-dark-border'
+                    }">
+                    ${genre}
+                </button>
+            `).join('');
+        }
+
+        function setGenre(genre) {
+            selectedGenre = genre;
+            renderGenrePills();
+            applyFilters();
+        }
+
+        const heroAnimeList = animeData.filter(a => a.heroFeatured);
+
+        function renderHeroCarousel() {
+            const container = document.getElementById('heroContainer');
+            const dotsContainer = document.getElementById('heroDots');
+            
+            if (heroAnimeList.length === 0) return;
+
+            const item = heroAnimeList[currentHeroIndex];
+
+            container.innerHTML = `
+                <div class="grid lg:grid-cols-12 gap-6 items-center">
+                    <div class="lg:col-span-7 space-y-4 z-10">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-1 bg-brand-accent/90 text-white text-[10px] font-extrabold uppercase rounded-md tracking-wider">
+                                Рекомендуем
+                            </span>
+                            <span class="text-xs text-yellow-400 font-bold flex items-center gap-1">
+                                <i class="fa-solid fa-star"></i> ${item.rating}
+                            </span>
+                            <span class="text-xs text-gray-400">• ${item.year}</span>
+                        </div>
+                        <h1 class="text-3xl sm:text-5xl font-black text-white leading-tight tracking-tight drop-shadow-md">
+                            ${item.title}
+                        </h1>
+                        <p class="text-xs sm:text-sm text-gray-300 line-clamp-3 leading-relaxed max-w-2xl">
+                            ${item.synopsis}
+                        </p>
+                        <div class="flex flex-wrap items-center gap-3 pt-2">
+                            <button onclick="openDetailModal('${item.id}')" class="px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-brand-600/30 flex items-center gap-2 transition-all hover:scale-105">
+                                <i class="fa-solid fa-play"></i> Подробнее и Смотреть
+                            </button>
+                            <button onclick="toggleFavorite('${item.id}')" class="px-4 py-3 bg-dark-card/90 hover:bg-dark-hover text-gray-200 border border-dark-border font-semibold text-xs rounded-xl flex items-center gap-2 transition-all">
+                                <i class="${isFavorite(item.id) ? 'fa-solid text-brand-accent' : 'fa-regular'} fa-bookmark"></i>
+                                ${isFavorite(item.id) ? 'В закладках' : 'В закладки'}
+                            </button>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-5 relative group hidden lg:block">
+                        <div class="relative rounded-2xl overflow-hidden border-2 border-dark-border shadow-2xl aspect-[3/4] max-w-xs mx-auto">
+                            <img src="${item.poster}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-dark-base/80 via-transparent to-transparent"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            dotsContainer.innerHTML = heroAnimeList.map((_, idx) => `
+                <button onclick="setHeroSlide(${idx})" class="h-2 rounded-full transition-all ${idx === currentHeroIndex ? 'w-8 bg-brand-500' : 'w-2 bg-gray-600 hover:bg-gray-400'}"></button>
+            `).join('');
+        }
+
+        function setHeroSlide(idx) {
+            currentHeroIndex = idx;
+            renderHeroCarousel();
+            resetHeroTimer();
+        }
+
+        function nextHeroSlide() {
+            currentHeroIndex = (currentHeroIndex + 1) % heroAnimeList.length;
+            renderHeroCarousel();
+        }
+
+        function startHeroTimer() {
+            heroTimer = setInterval(nextHeroSlide, 6000);
+        }
+
+        function resetHeroTimer() {
+            clearInterval(heroTimer);
+            startHeroTimer();
+        }
+
+        function applyFilters() {
+            const statusVal = document.getElementById('statusSelect').value;
+            const formatVal = document.getElementById('formatSelect').value;
+            const sortVal = document.getElementById('sortSelect').value;
+
+            let filtered = animeData.filter(item => {
+                const matchesGenre = selectedGenre === "Все" || item.genres.includes(selectedGenre);
+                const matchesSearch = searchQuery === "" || 
+                    item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                    item.origTitle.toLowerCase().includes(searchQuery.toLowerCase());
+                const matchesStatus = statusVal === "all" || item.status === statusVal;
+                const matchesFormat = formatVal === "all" || item.format === formatVal;
+
+                return matchesGenre && matchesSearch && matchesStatus && matchesFormat;
+            });
+
+            filtered.sort((a, b) => {
+                if (sortVal === "rating") return b.rating - a.rating;
+                if (sortVal === "popularity") return b.popularity - a.popularity;
+                if (sortVal === "year_desc") return b.year - a.year;
+                if (sortVal === "year_asc") return a.year - b.year;
+                return 0;
+            });
+
+            renderAnimeGrid(filtered);
+
+            document.getElementById('animeCount').innerText = filtered.length;
+            const isFiltered = selectedGenre !== "Все" || searchQuery !== "" || statusVal !== "all" || formatVal !== "all";
+            document.getElementById('activeFilterBadge').classList.toggle('hidden', !isFiltered);
+        }
+
+        function resetFilters() {
+            selectedGenre = "Все";
+            searchQuery = "";
+            document.getElementById('searchInput').value = "";
+            document.getElementById('mobileSearchInput').value = "";
+            document.getElementById('statusSelect').value = "all";
+            document.getElementById('formatSelect').value = "all";
+            document.getElementById('sortSelect').value = "rating";
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+            renderGenrePills();
+            applyFilters();
+        }
+
+        function filterByNav(type) {
+            resetFilters();
+            if (type === 'ongoing') {
+                document.getElementById('statusSelect').value = 'Онгоинг';
+            } else if (type === 'movies') {
+                document.getElementById('formatSelect').value = 'Movie';
+            } else if (type === 'top') {
+                document.getElementById('sortSelect').value = 'rating';
+            }
+            applyFilters();
+        }
+
+        function renderAnimeGrid(items) {
+            const grid = document.getElementById('animeGrid');
+            const emptyState = document.getElementById('emptyState');
+
+            if (items.length === 0) {
+                grid.innerHTML = "";
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            grid.innerHTML = items.map(item => {
+                const fav = isFavorite(item.id);
+                return `
+                    <div class="group relative bg-dark-card rounded-2xl overflow-hidden border border-dark-border/70 hover:border-brand-500/50 shadow-lg hover:shadow-2xl hover:shadow-brand-600/10 transition-all duration-300 flex flex-col">
+                        
+                        <div class="relative aspect-[3/4] overflow-hidden bg-dark-base cursor-pointer" onclick="openDetailModal('${item.id}')">
+                            <img src="${item.poster}" alt="${item.title}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            
+                            <div class="absolute top-2.5 left-2.5 bg-dark-base/80 backdrop-blur-md border border-white/10 text-yellow-400 font-bold text-[11px] px-2 py-0.5 rounded-lg flex items-center gap-1 shadow">
+                                <i class="fa-solid fa-star text-[10px]"></i> ${item.rating}
+                            </div>
+
+                            <div class="absolute top-2.5 right-2.5 bg-brand-600/90 text-white font-extrabold text-[9px] px-2 py-0.5 rounded-md uppercase tracking-wider shadow">
+                                ${item.format}
+                            </div>
+
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <div class="w-12 h-12 rounded-full bg-brand-accent text-white flex items-center justify-center text-lg shadow-xl transform scale-75 group-hover:scale-100 transition-transform">
+                                    <i class="fa-solid fa-play ml-1"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-3.5 flex-1 flex flex-col justify-between space-y-2">
+                            <div>
+                                <div class="flex items-center justify-between text-[10px] text-gray-400 mb-1">
+                                    <span>${item.year}</span>
+                                    <span>${item.episodes} с.</span>
+                                </div>
+                                <h3 onclick="openDetailModal('${item.id}')" class="font-bold text-sm text-gray-100 group-hover:text-brand-500 transition-colors line-clamp-2 cursor-pointer leading-snug">
+                                    ${item.title}
+                                </h3>
+                            </div>
+
+                            <div class="pt-2 border-t border-dark-border/40 flex items-center justify-between gap-1">
+                                <div class="flex flex-wrap gap-1 overflow-hidden h-5">
+                                    ${item.genres.slice(0, 2).map(g => `<span class="text-[9px] bg-dark-hover text-gray-400 px-1.5 py-0.5 rounded border border-dark-border">${g}</span>`).join('')}
+                                </div>
+                                <button onclick="toggleFavorite('${item.id}')" class="p-1.5 text-gray-400 hover:text-brand-accent transition-colors" title="Добавить в избранное">
+                                    <i class="${fav ? 'fa-solid text-brand-accent' : 'fa-regular'} fa-bookmark text-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function setupSearchListeners() {
+            const input = document.getElementById('searchInput');
+            const mobileInput = document.getElementById('mobileSearchInput');
+
+            const handleSearch = (val) => {
+                searchQuery = val;
+                document.getElementById('clearSearchBtn').classList.toggle('hidden', searchQuery === "");
+                applyFilters();
+            };
+
+            input.addEventListener('input', (e) => handleSearch(e.target.value));
+            mobileInput.addEventListener('input', (e) => handleSearch(e.target.value));
+        }
+
+        function clearSearch() {
+            searchQuery = "";
+            document.getElementById('searchInput').value = "";
+            document.getElementById('mobileSearchInput').value = "";
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+            applyFilters();
+        }
+
+        function toggleMobileSearch() {
+            const box = document.getElementById('mobileSearchBox');
+            box.classList.toggle('hidden');
+        }
+
+        function isFavorite(id) {
+            return favorites.includes(id);
+        }
+
+        function toggleFavorite(id) {
+            if (isFavorite(id)) {
+                favorites = favorites.filter(favId => favId !== id);
+                showToast("Удалено из закладок");
+            } else {
+                favorites.push(id);
+                showToast("Добавлено в закладки!");
+            }
+            localStorage.setItem('aniRealm_favs', JSON.stringify(favorites));
+            updateFavCount();
+            applyFilters();
+            renderHeroCarousel();
+            renderFavoritesDrawer();
+        }
+
+        function updateFavCount() {
+            document.getElementById('favCountBadge').innerText = favorites.length;
+        }
+
+        function toggleFavoritesDrawer() {
+            const drawer = document.getElementById('favDrawer');
+            const overlay = document.getElementById('favDrawerOverlay');
+            const isOpen = !drawer.classList.contains('translate-x-full');
+
+            if (isOpen) {
+                drawer.classList.add('translate-x-full');
+                overlay.classList.add('opacity-0', 'pointer-events-none');
+            } else {
+                renderFavoritesDrawer();
+                drawer.classList.remove('translate-x-full');
+                overlay.classList.remove('opacity-0', 'pointer-events-none');
+            }
+        }
+
+        function renderFavoritesDrawer() {
+            const container = document.getElementById('favListContainer');
+            const favItems = animeData.filter(a => favorites.includes(a.id));
+
+            if (favItems.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-gray-500 space-y-2">
+                        <i class="fa-solid fa-bookmark text-3xl"></i>
+                        <p class="text-xs font-semibold">Ваша коллекция пуста</p>
+                        <p class="text-[10px]">Жмите на иконку закладки у аниме, чтобы сохранить его сюда.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = favItems.map(item => `
+                <div class="flex gap-3 bg-dark-card p-2.5 rounded-xl border border-dark-border/80 hover:border-brand-500/40 transition-all items-center">
+                    <img src="${item.poster}" alt="${item.title}" class="w-12 h-16 object-cover rounded-lg">
+                    <div class="flex-1 min-w-0">
+                        <h4 onclick="openDetailModal('${item.id}'); toggleFavoritesDrawer();" class="text-xs font-bold text-white truncate hover:text-brand-500 cursor-pointer">
+                            ${item.title}
+                        </h4>
+                        <p class="text-[10px] text-gray-400">${item.year} • ★ ${item.rating}</p>
+                        <span class="inline-block text-[9px] bg-brand-600/30 text-brand-500 px-1.5 py-0.5 rounded mt-1 font-semibold">${item.format}</span>
+                    </div>
+                    <button onclick="toggleFavorite('${item.id}')" class="p-2 text-gray-400 hover:text-red-400 transition-colors">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function clearAllFavorites() {
+            if (favorites.length === 0) return;
+            favorites = [];
+            localStorage.setItem('aniRealm_favs', JSON.stringify(favorites));
+            updateFavCount();
+            applyFilters();
+            renderFavoritesDrawer();
+            showToast("Закладки очищены");
+        }
+
+        function openDetailModal(id) {
+            const item = animeData.find(a => a.id === id);
+            if (!item) return;
+
+            activeModalAnime = item;
+
+            document.getElementById('modalBannerImg').src = item.banner;
+            document.getElementById('modalPosterImg').src = item.poster;
+            document.getElementById('modalTitle').innerText = item.title;
+            document.getElementById('modalOrigTitle').innerText = item.origTitle;
+            document.getElementById('modalStatusBadge').innerText = item.status;
+            document.getElementById('modalFormatBadge').innerText = item.format;
+            document.getElementById('modalYear').innerText = item.year + ' г.';
+
+            document.getElementById('modalRating').innerText = '★ ' + item.rating;
+            document.getElementById('modalEpisodes').innerText = item.episodes + ' эп.';
+            document.getElementById('modalDuration').innerText = item.duration;
+            document.getElementById('modalStudio').innerText = item.studio;
+
+            document.getElementById('modalSynopsis').innerText = item.synopsis;
+
+            document.getElementById('modalGenres').innerHTML = item.genres.map(g => `
+                <span class="px-2.5 py-1 bg-dark-hover border border-dark-border rounded-lg text-xs font-medium text-gray-300">${g}</span>
+            `).join('');
+
+            // Embedded YouTube Trailer
+            const videoContainer = document.getElementById('videoPlayerContainer');
+            videoContainer.innerHTML = `
+                <iframe class="w-full h-full" src="https://www.youtube.com/embed/${item.trailerYoutubeId}?autoplay=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            `;
+
+            // Characters
+            document.getElementById('modalCharacters').innerHTML = item.characters.map(c => `
+                <div class="flex items-center gap-2.5 p-2 rounded-xl bg-dark-card border border-dark-border/50">
+                    <img src="${c.img}" class="w-10 h-10 rounded-lg object-cover">
+                    <div class="min-w-0">
+                        <p class="text-xs font-bold text-white truncate">${c.name}</p>
+                        <p class="text-[10px] text-gray-400 truncate">${c.role}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            // Screenshots
+            document.getElementById('modalScreenshots').innerHTML = item.screenshots.map(img => `
+                <div class="rounded-xl overflow-hidden border border-dark-border/60 aspect-video">
+                    <img src="${img}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                </div>
+            `).join('');
+
+            renderModalReviews();
+
+            const overlay = document.getElementById('detailModalOverlay');
+            const card = document.getElementById('detailModalCard');
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            card.classList.remove('scale-95');
+            card.classList.add('scale-100');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDetailModal(e) {
+            if (e.target.id === 'detailModalOverlay') {
+                closeDetailModalForce();
+            }
+        }
+
+        function closeDetailModalForce() {
+            const overlay = document.getElementById('detailModalOverlay');
+            const card = document.getElementById('detailModalCard');
+            
+            // Stop Video on Modal Close
+            document.getElementById('videoPlayerContainer').innerHTML = "";
+
+            overlay.classList.add('opacity-0', 'pointer-events-none');
+            card.classList.remove('scale-100');
+            card.classList.add('scale-95');
+            document.body.style.overflow = '';
+        }
+
+        function renderModalReviews() {
+            if (!activeModalAnime) return;
+            const container = document.getElementById('modalReviews');
+
+            if (activeModalAnime.reviews.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-500 italic">Пока нет отзывов. Будьте первым!</p>`;
+                return;
+            }
+
+            container.innerHTML = activeModalAnime.reviews.map(r => `
+                <div class="bg-dark-card p-3 rounded-xl border border-dark-border/50 space-y-1">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold text-brand-500">${r.user}</span>
+                        <div class="flex items-center gap-2 text-[10px] text-gray-400">
+                            <span>${r.date}</span>
+                            <span class="text-yellow-400 font-bold bg-yellow-400/10 px-1.5 py-0.5 rounded">★ ${r.rating}</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-300 leading-relaxed">${r.text}</p>
+                </div>
+            `).join('');
+        }
+
+        function submitReview() {
+            const textInput = document.getElementById('newReviewText');
+            const ratingInput = document.getElementById('newReviewRating');
+
+            const text = textInput.value.trim();
+            if (!text) {
+                showToast("Введите текст отзыва!");
+                return;
+            }
+
+            const newRev = {
+                user: "Alex_Otaku (Вы)",
+                rating: parseInt(ratingInput.value),
+                text: text,
+                date: "Только что"
+            };
+
+            activeModalAnime.reviews.unshift(newRev);
+            textInput.value = "";
+            renderModalReviews();
+            showToast("Спасибо за ваш отзыв!");
+        }
+
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        document.addEventListener('click', (e) => {
+            const btn = document.getElementById('userProfileBtn');
+            const menu = document.getElementById('userMenu');
+            if (btn && menu && !btn.contains(e.target) && !menu.contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.innerText = msg;
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
